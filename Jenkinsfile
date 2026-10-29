@@ -112,6 +112,11 @@ pipeline {
 					}
 				}
 
+				environment {
+					CI_ENVIRONMENT_URL = 'https://tvtrung-jenkins.netlify.app/'
+				}
+
+
 				steps {
 					sh '''
 						npx playwright test --reporter=html
