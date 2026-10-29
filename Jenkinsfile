@@ -2,6 +2,7 @@ pipeline {
 	agent any
 
 	environment {
+		NETLIFY_SITE_ID = '5b6933b7-6146-4f22-925c-6874962cfad7'
 		NETLIFY_AUTH_TOKEN = credentials('netlify-token-jenkins')
 	}
 
@@ -76,7 +77,7 @@ pipeline {
 															keepAll: false,
 															reportDir: 'playwright-report',
 															reportFiles: 'index.html',
-															reportName: 'Playwright HTML Report'
+															reportName: 'Playwright Local'
 													])
 											}
 									}
@@ -101,5 +102,34 @@ pipeline {
 			        '''
 			    }
 			}
+			
+			stage('Prod E2E') {
+				agent {
+					docker {
+						image 'mcr.microsoft.com/playwright:v1.64.1-noble'
+						reuseNode true
+						args '-u root:root'
+					}
+				}
+
+				steps {
+					sh '''
+						npx playwright test --reporter=html
+					'''
+				}
+
+				post {
+						always {
+								publishHTML(target: [
+										allowMissing: false,
+										alwaysLinkToLastBuild: false,
+										keepAll: false,
+										reportDir: 'playwright-report',
+										reportFiles: 'index.html',
+										reportName: 'Playwright E2E HTML Report'
+								])
+						}
+				}
+		}
 		}
 }
